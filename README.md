@@ -6,6 +6,33 @@ A Havoc extension framework for remote execution of Beacon Object Files (BOFs) u
 
 Remote BOF Runner enables secure execution of BOFs in arbitrary processes by leveraging the Crystal Palace PIC loader. This framework implements a sophisticated inter-process communication (IPC) mechanism through named pipes to transparently forward beacon output from injected processes back to the command and control (C2) server.
 
+## Setup & Installation
+
+### Extension Installation
+Ensure the extension is installed in the Havoc extensions directory:
+```
+YOUR_HAVOC_FOLDER + /data/extensions/
+```
+
+### Dependencies
+To compile the PIC loader, the following tools and libraries must be installed on your system:
+
+- **MinGW-w64**: Cross-compiler for Windows targets
+- **Make**: Build automation tool
+- **OpenJDK 11**: Java Development Kit (required for Crystal Palace compilation)
+- **Zip**: Compression utility
+
+For detailed setup instructions, refer to the [WSL Setup Guide](https://tradecraftgarden.org/wslsetup.html).
+
+#### Installation Commands
+```bash
+sudo apt-get update
+sudo apt-get install mingw-w64
+sudo apt-get install make
+sudo apt-get install openjdk-11-jdk
+sudo apt-get install zip
+```
+
 ## Architecture
 
 ### Components
